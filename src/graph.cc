@@ -294,6 +294,13 @@ bool DependencyScan::RecomputeOutputDirty(const Edge* edge,
                 entry->mtime, most_recent_input->mtime());
         return true;
       }
+
+      TimeStamp mtime = disk_interface_->Stat(output->path(), nullptr);
+      if (mtime <= 0 || entry->mtime != mtime) {
+        EXPLAIN("recorded mtime of %s differs from on-disk mtime (%" PRId64 " vs %" PRId64 ")",
+                output->path().c_str(), entry->mtime, mtime);
+        return true;
+      }
     }
     if (!entry && !generator) {
       EXPLAIN("command line not found in log for %s", output->path().c_str());
